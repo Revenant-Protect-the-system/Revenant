@@ -1,6 +1,11 @@
 import time
 import psutil
 
+# Import the Database into the main file
+import Database.DatabaseManager
+the_database = Database.DatabaseManager.Database()
+
+# Run the main file
 last_received = psutil.net_io_counters().bytes_recv
 last_sent = psutil.net_io_counters().bytes_sent
 last_total = last_received + last_sent
