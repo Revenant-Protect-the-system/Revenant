@@ -6,8 +6,8 @@ class Database:
                                                 #   {"ip":"255.255.100.126", "time":1203003.2],
                                                 #   ["ip":"100.255.234.200", "time":4343447.12],
                                                 #   etc... ]
-        self.filename = "\\Database.txt"
-        self.Open()
+        self.filename = "Database.txt"
+        #self.Open()
     
     ### <summary>
     ### Retrieves all the database's data from a ".txt" file(s)
@@ -19,7 +19,7 @@ class Database:
             file = open(self.filename, 'r')
             file_content = file.read()
             file.close()
-            print("Database Openned")
+            print("Database Opened")
         except FileNotFoundError:
             print("ERROR: file \"{}\" could not be found".format(self.filename))
             print("Open Database Failed.")
@@ -59,6 +59,7 @@ class Database:
     def Add(self, input_ip, input_time=None):
         if input_time == None:
             input_time = time.time()            # If no time is provided: set it to the current time
+                                                # time.time() is Current time in seconds since epoch
         input_time = float(input_time)          # Ensure the provided time is a float
         add = dict()
         add["ip"] = input_ip
