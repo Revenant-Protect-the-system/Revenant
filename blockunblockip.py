@@ -1,17 +1,17 @@
 import iptc
 import time
 
-blocked = {}  # { ip: timestamp }
+blocked = {}
 
-BLOCK_TIME = 3600  # seconds
+BLOCK_TIME = 9000  
 
 def block_ip(ip):
     if ip in blocked:
-        return  # already blocked
+        return  
 
     rule = iptc.Rule()
     rule.src = ip
-    rule.protocol = "tcp"  # optional, or "udp", or leave blank
+    rule.protocol = "tcp"  
     target = iptc.Target(rule, "DROP")
     rule.target = target
 
@@ -22,12 +22,13 @@ def block_ip(ip):
     print(f"Blocked {ip}")
 
 def unblock_expired():
+    
     now = time.time()
     chain = iptc.Chain(iptc.Table(iptc.Table.FILTER), "INPUT")
 
     for ip, timestamp in list(blocked.items()):
         if now - timestamp >= BLOCK_TIME:
-            # Find the rule and remove it
+           
             for rule in chain.rules:
                 if rule.src == ip and rule.target.name == "DROP":
                     chain.delete_rule(rule)
