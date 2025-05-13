@@ -14,7 +14,6 @@ def Check_For_DDoS(data, time_gap):
     for key in ip_dict.keys():
         ip_dict[key] = i
         i += 1
-    print("ip_dict = ",ip_dict)
 
     # 3. create list to store all ip data in
     ip_array = np.full((len(ip_dict), 5), 0)

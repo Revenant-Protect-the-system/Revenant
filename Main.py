@@ -55,14 +55,12 @@ database.Open()
 try:
     while True:                                             # Repeat endlessly until a "Close_Window" exception is thrown
         # 3.1. Collect one seconds worth of Packets
-        print("phase 1")
         packet_capture_time = 1.0
         time_start = time.time()
         time_end = time_start + packet_capture_time
         while time.time() < time_end:                       # only close after <packet_capture_time> seconds
             sniff(prn=LogPacket, count=1)
         packet_capture_time = time.time() - time_start      # Due to delay, the packet may take longer to capture
-        print("phase 2")
         
 
         # 3,2. Scan input packets for DDoS looking activity
@@ -76,6 +74,7 @@ try:
         gui.Input(data_cache)
         gui.Update()
         gui.Render()
+        print("\n\n\n")
 except GUI.Close_Window:
     pass
 
