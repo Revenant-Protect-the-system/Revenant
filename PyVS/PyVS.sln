@@ -1,0 +1,23 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35931.197 d17.13
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "PyVS", "PyVS\PyVS.pyproj", "{0A24FAF3-CF74-4BCA-AE49-24091D4816D8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0A24FAF3-CF74-4BCA-AE49-24091D4816D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0A24FAF3-CF74-4BCA-AE49-24091D4816D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5ED48424-5D70-4C22-B5AE-C05AB80E84E7}
+	EndGlobalSection
+EndGlobal
