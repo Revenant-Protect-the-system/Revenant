@@ -12,7 +12,6 @@ from scapy.all import Ether, IP, TCP, UDP, ICMP
 # 2. Initialise global variables/objects
 database = DatabaseManager.Database_Class()                 # 2.1. Instantiate Database
 gui = GUI.GUI_Class(1000, 600)                            # 2.2. Instantiate GUI
-admin_emails = notificationCode.AdminEmails()
 data_cache = list()
 data_cache_capacity = 1000
 

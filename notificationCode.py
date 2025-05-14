@@ -69,3 +69,5 @@ class AdminEmails:
     def Remove(self, index):
         del self.index[index]
         self.Save()
+    
+admin_emails = AdminEmails()

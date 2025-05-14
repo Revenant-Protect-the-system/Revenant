@@ -1,3 +1,4 @@
+import notificationCode
 import Firewall
 import pygame
 pygame.init()
@@ -64,7 +65,14 @@ class Button_Sort_1 (Button):
             self.text = "View Bandwidth taken by each IP"
         elif globals.sort_by=="volume":
             self.text = "View instances/s of each IP"
-
+class Button_Admin_Add (Button):
+    def Clicked(self):
+        print("current admin emails:")
+        for admin in notificationCode.admin_emails.emails:
+            print("-",admin)
+        print("Please type the email address of the admin you'd like to notify, should a DDoS attack be detected")
+        reply = input(">>> ")
+        notificationCode.admin_emails.Add(reply)
 
 
 class Graph:
@@ -139,10 +147,12 @@ class GUI_Class:
         # 2. Instantiate all agents inside the GUI
         self.agent_list = list()
         button_sort_1 = Button_Sort_1(self.screen, 150, 25, 350, 50, "View Bandwidth taken by each packet", globals)
-        table_1 = Graph(self.screen, 150,100, 700,300,)
+        admin_button = Button_Admin_Add(self.screen, 200, 420, 100,50, "Add Admin Email", None)
+        graph = Graph(self.screen, 150,100, 700,300)
         # 3. Save all agents for later use
         self.agent_list.append(button_sort_1)
-        self.agent_list.append(table_1)
+        self.agent_list.append(admin_button)
+        self.agent_list.append(graph)
     def __del__(self):
         self.Close()
     def Close(self):
