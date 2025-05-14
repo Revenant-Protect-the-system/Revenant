@@ -12,7 +12,7 @@ BLOCK_TIME = 9000
 
 def block_ip(ip):
     if sys.platform.startswith('win'):
-        pass
+        print(f"<Pretend ip \"{ip}\" is blocked>")
     elif sys.platform.startswith('linux'):
         if ip in blocked:
             return  
@@ -31,7 +31,7 @@ def block_ip(ip):
 
 def unblock_expired():
     if sys.platform.startswith('win'):
-        pass
+        print("<unblock_expired()>")
     elif sys.platform.startswith('linux'):
         now = time.time()
         chain = iptc.Chain(iptc.Table(iptc.Table.FILTER), "INPUT")
