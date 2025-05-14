@@ -1,8 +1,17 @@
+import time
 import numpy as np
+#import blockunblockip
+import notificationCode
+
+class blockunblockip: ############################################# Placeholder
+    BLOCK_TIME = 9000 ############################################# Placeholder
 
 
-DDOS_BYTES_PER_SECOND = 2                       # IF more than this many Bytes are sent through the network by an individual IP: then it's flagged as a DDoS attack
-DDOS_PACKETS_PER_SECOND = 20                    # IF more than this many packets are sent by an individual IP: then it's flagged as a DDoS attack
+
+
+DDOS_BYTES_PER_SECOND = 300000                  # IF more than this many Bytes are sent through the network by an individual IP: then it's flagged as a DDoS attack
+DDOS_PACKETS_PER_SECOND = 400                   # IF more than this many packets are sent by an individual IP: then it's flagged as a DDoS attack
+adminEmails = list()
 
 def Check_For_DDoS(data, time_gap):
     # 1. log every IP in data
@@ -41,13 +50,30 @@ def Check_For_DDoS(data, time_gap):
         # 5.1. IF an IP has appeared over 20 times per second: flag as DDoS
         if row[1] > DDOS_PACKETS_PER_SECOND:
             print(f"suspected Volumetric DDoS attack by ip \"{ip}\"!")
-            sus_ips.append(ip)
+            sus_ips.append((ip, "volume"))
             continue
         # 5.2. IF an IP has uploaded over 2B/s: flag as DDoS
         if row[2] > DDOS_BYTES_PER_SECOND:
             print(f"suspected Aplication Layer DDoS attack by ip \"{ip}\"!")
-            sus_ips.append(ip)
+            sus_ips.append((ip, "layer"))
             continue
+    
+    for ip in sus_ips:
+        print(f"blocking suspicious ip \"{ip[0]}\"")
+        #blockunblockip.block_ip(ip[0])##############################################################################################
+        print("notifying admins")
+        for admin in adminEmails:
+            message = ""
+            if ip[1] == "volume":
+                message = f'''Dear Admin
+                
+                a suspected volumetric attack has been detected by IP \"{ip[0]}\". 
+                Revenant has responded by temporarily blocking the IP for {blockunblockip.BLOCK_TIME} seconds.
+                If you want to block the IP, please console "Database.txt" for ip \"{ip[0]}\" before time {time.time()}s
+                
+                yours faithfully Revenant'''
+            notificationCode.sendEmail(admin, "Suspected DDoS attack has been blocked")
+
 
     # <TESTING>
     print("Contents of 'ip_array':")
