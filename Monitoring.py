@@ -12,12 +12,13 @@ import logging
 import time
 import psutil
 
-from DatabaseManager import Database
+from DatabaseManager import Database_Class
 
-limit = 1000
+limit = 100
 packet_Count = 0
 protocol_counter = {'Ether' : 0, 'IP' : 0, 'TCP' : 0, 'UDP' : 0, 'ICMP' : 0}
-main_Database = Database()
+main_Database = Database_Class()
+main_Database.Open()
 
 def printChart():
     
@@ -46,12 +47,15 @@ def printChart():
     plt.show()
 
 def logPacket(packet):
+    main_Database.Add(packet)
+    '''
     if packet.haslayer(Ether):
         main_Database.Add(packet[Ether].src)
     elif packet.haslayer(IP):
         main_Database.Add(packet[IP].src)
     else:
         None
+    '''
 
 def packetScan(packet):
     global packet_Count
@@ -84,7 +88,7 @@ def capturePackets():
     print(protocol_counter)
     print(captured)
     print("\n\n\n\n\n\n\n")
-    main_Database.Print()
+    main_Database.Print()################################
     printChart()
     main_Database.Save()
     return captured
@@ -94,4 +98,11 @@ def beginMonitoring():
 
     return
 
-beginMonitoring()
+
+
+if __name__ == "__main__":
+
+    beginMonitoring()
+    c = time.time()
+    a = main_Database.SelectTimes(start = c-2, end = c-1)
+    print("ips in the time between 1s and 2s ago =",a)

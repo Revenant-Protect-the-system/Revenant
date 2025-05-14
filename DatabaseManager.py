@@ -1,6 +1,8 @@
 import time
+from scapy.all import *
+from scapy.all import Ether, IP, TCP, UDP, ICMP
 
-class Database:
+class Database_Class:
     def __init__(self):
         self.content = list()                   # Format: self.content = list<{"ip": insert_ip, "time": insert_time)> = [
                                                 #   {"ip":"255.255.100.126", "time":1203003.2],
@@ -19,16 +21,24 @@ class Database:
             file = open(self.filename, 'r')
             file_content = file.read()
             file.close()
-            print("Database Opened")
+            print("Database Opened.")
         except FileNotFoundError:
             print("ERROR: file \"{}\" could not be found".format(self.filename))
             print("Open Database Failed.")
             return
         # 2. converts the raw data into a format suitable to store
+        if len(file_content) < 10:
+            print("the database currently is empty.")
+            return
         file_content = file_content.split('\n')
         for item in file_content:
-            item = item.split(',')
-            self.Add(input_ip = item[0], input_time = item[1])
+            item = item.split('|')
+            self.AddRaw(
+                i_ip = item[0],
+                i_src = item[1],
+                i_size = item[2],
+                i_time = item[3] )
+        print("Database loaded.")
     
     ### <summary>
     ### Saves the contents of the database in a ".txt" file(s) for later use
@@ -38,7 +48,11 @@ class Database:
         file_content = ""
         for record in self.content:
             file_content += record["ip"]
-            file_content += ','
+            file_content += '|'
+            file_content += str(record["src"])
+            file_content += '|'
+            file_content += str(record["size"])
+            file_content += '|'
             file_content += str(record["time"])
             file_content += '\n'
         file_content = file_content[0:-1]    # remove the last useless '\n' in "file_content"
@@ -51,32 +65,68 @@ class Database:
         except FileNotFoundError:
             print("ERROR: Database: Save(): file \"{}\" could not be found".format(self.filename))
             print("Database Save Failed")
-    
+
     ### <summary>
-    ### Adds a new IP to the database
-    ### if the time for the IP was added isn't provided: it'll simply input the current time
+    ### Iteration 2: A more direct "Add()" function for database
     ### </summary>
-    def Add(self, input_ip, input_time=None):
-        if input_time == None:
-            input_time = time.time()            # If no time is provided: set it to the current time
-                                                # time.time() is Current time in seconds since epoch
-        input_time = float(input_time)          # Ensure the provided time is a float
+    def Add(self, packet):
         add = dict()
-        add["ip"] = input_ip
-        add["time"] = input_time
+        # 1. Get packet IP
+        if packet.haslayer(Ether):
+            add["ip"] = packet[Ether].src
+        elif packet.haslayer(IP):
+            add["ip"] = packet[IP].src
+        else:
+            raise IOError
+        # 2. Get packet source location
+        if packet.haslayer(Ether):
+            add["src"] = packet[Ether].src
+        if packet.haslayer(IP):
+            add["src"] = packet[IP].src
+        if packet.haslayer(TCP):
+            add["src"] = packet[TCP].sport
+        if packet.haslayer(UDP):
+            add["src"] = packet[UDP].sport
+        if packet.haslayer(ICMP):               # NOTE: ICMPs are very popular for DDoS!!!
+            add["src"] = packet[ICMP].type
+        # 3. Get file size of the packet
+        add["size"] = len(packet)
+        # 4. Get time of the packet's arrival
+        add["time"] = float(time.time())
+        # INSERT the packet's info into "self.content" CHRONOLOGICALLY
+        if len(self.content) == 0:
+            self.content.append(add)
+            return
+        if add["time"] > self.content[-1]["time"]:          # Can we just add it to the end?
+            self.content.append(add)
+            return
+        i = -1                                              # ELSE: look back through the list until you're no longer looking at the future
+        while add["time"] > self.content[i]["time"]:
+            i -= 1
+        self.content.insert(i, add)
+
+    ### <summary>
+    ### enables directly adding data
+    ### </summary>
+    def AddRaw(self, i_ip, i_src, i_size, i_time):
+        add = dict()
+        add["ip"] = i_ip
+        add["src"] = i_src
+        add["size"] = i_size
+        add["time"] = float(i_time)
         self.content.append(add)
+
     ### <summary>
     ### Prints out the contents of the database
     ### </summary>
     def Print(self):
-        print(" Id: | IP:             | Time(s):")
+        print(" Id  | IP                | source | size(b) | Time(s)")
         i = -1
         for record in self.content:
             i += 1
-            ip = record["ip"]
-            time = str(record["time"])
-            print("{:4} | {:16}| {:19}".format(i, ip, time))
+            print(f"{i:4} | {record["ip"]:16} | {record["src"]:6} | {record["size"]:7} | {record["time"]:19}")
         print("")
+
     ### <summary>
     ### A private function used to find the index of a particular ip/time inside "self.content".
     ### Used by "self.IndexIp(...)"
@@ -118,6 +168,7 @@ class Database:
             output.append(add)
         return output
     
+
     def SelectIp(self, input_ip):
         return self._IndexAll(
             input_value = input_ip, 
@@ -151,11 +202,49 @@ class Database:
                     continue
             output.append(record["ip"])
         return output
+    ### <summary>
+    ### Selects all ips between time "Start" and "end"
+    ### </summary>
+    def SelectTimes(self, start=None, end=None):
+        if end == None:
+            raise ValueError("ERROR: no data was input")
+        if start == None:
+            start = 0                # If a start time isn't specified: set it to a 
+                                                # value so low that every time inside the database 
+                                                # should be within the start time.
+        if end == None:
+            end = time.time() * 2    # If an end time isn't specified: set it to a 
+                                                # value so high that every time inside the database
+                                                # should be within the end time.
+        outputEnd = len(self.content) - 1
+        while outputEnd > 0 and end < self.content[outputEnd]["time"]:
+            outputEnd -= 1
+        outputStart = outputEnd
+        while outputStart > 0 and start < self.content[outputStart]["time"]:
+            outputStart -= 1
+        print("Start time = ",start)
+        print("end time = ",end)
+        print("start[-1] =", self.content[outputStart-1])
+        print("start[ 0] =", self.content[outputStart  ])
+        try:
+            print("start[ 1] =", self.content[outputStart+1])
+        except Exception: pass
+        print("end[-1] =", self.content[outputEnd-1])
+        print("end[ 0] =", self.content[outputEnd  ])
+        try:
+            print("end[ 1] =", self.content[outputStart+1])
+        except Exception: pass
+        return self.content[outputStart+1 : outputEnd + 1]
+
+
+
+
+
 
 
 
 if __name__ == '__main__':
-    the_database = Database()
+    the_database = Database_Class()
 
     the_database.Print()
 
