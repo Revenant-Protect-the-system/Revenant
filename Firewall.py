@@ -25,22 +25,22 @@ def Check_For_DDoS(data, time_gap):
         i += 1
 
     # 3. create list to store all ip data in
-    ip_array = np.full((len(ip_dict), 5), 0)
+    ip_array = np.empty([len(ip_dict), 5], dtype = float)
     for i in range(len(ip_dict)):
         ip_array[i][0] = i
 
     # 4. Give every IP the following data
     for row in data:
-        dict_key = row[0]
-        array_key = ip_dict[dict_key]
+        ip = row[0]
+        array_key = ip_dict[ip]
         # 4.1. how many packets have been recieved by an individual IP
-        ip_array[array_key][1] += 1
+        ip_array[array_key][1] += 1.0
         # 4.2. How many bytes of data that IP has pushed through the network
         ip_array[array_key][2] += row[2]
     # 4.3. Make all data relative to the time it was taken over
     for i in range(len(ip_array)):
-        ip_array[i][1] /= time_gap
-        ip_array[i][2] /= time_gap
+        ip_array[i][1] = float(ip_array[i][1]) / float(time_gap)
+        ip_array[i][2] = float(ip_array[i][2]) / float(time_gap)
 
     # 5. Go through all IPs and flag ones that loop like DDoS
     ip_dict_inverted = {v: k for k, v in ip_dict.items()}
@@ -81,7 +81,7 @@ def Check_For_DDoS(data, time_gap):
         ip = ip_dict_inverted[i]
         packets = ip_array[i][1]
         bytes = ip_array[i][2]
-        print(f"ip {ip} sends {packets} packets/s and consumes {bytes} Bytes/s!")
+        print(f"ip {ip} sends {packets:.2f} packets/s and consumes {bytes:.2f} Bytes/s!")
     # </TESTING>
     
-    return False###############################################################
+    return ip_array, sus_ips

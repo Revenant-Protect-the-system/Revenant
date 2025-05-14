@@ -72,21 +72,20 @@ class Database_Class:
     def Add(self, packet):
         add = dict()
         # 1. Get packet IP
+        add["ip"] = "UNKNOWN"
         if packet.haslayer(Ether):
             add["ip"] = packet[Ether].src
-        elif packet.haslayer(IP):
+        if packet.haslayer(IP):
             add["ip"] = packet[IP].src
-        else:
-            raise IOError
         # 2. Get packet source location
         if packet.haslayer(Ether):
             add["src"] = packet[Ether].src
-        if packet.haslayer(IP):
-            add["src"] = packet[IP].src
         if packet.haslayer(TCP):
             add["src"] = packet[TCP].sport
         if packet.haslayer(UDP):
             add["src"] = packet[UDP].sport
+        if packet.haslayer(IP):
+            add["src"] = packet[IP].src
         if packet.haslayer(ICMP):               # NOTE: ICMPs are very popular for DDoS!!!
             add["src"] = packet[ICMP].type
         # 3. Get file size of the packet

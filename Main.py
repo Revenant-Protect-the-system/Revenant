@@ -18,12 +18,16 @@ def LogPacket(packet):
     # 1. Get next index in "data_cache"
     global data_cache
 
+    error = False
+
     add = [1,2,3,4]
     # 2.1. Get IP
-    if packet.haslayer(Ether):
-        add[0] = packet[Ether].src
-    elif packet.haslayer(IP):
+    if packet.haslayer(IP):
         add[0] = packet[IP].src
+    elif packet.haslayer(Ether):
+        add[0] = packet[Ether].src
+        print("ERROR: only ethernet connection:")
+        error = True
     # 2.2. Get source location 
     if packet.haslayer(Ether):
         add[1] = packet[Ether].src
@@ -40,6 +44,8 @@ def LogPacket(packet):
     # 2.4. Get time of the packet's arrival
     add[3] = float(time.time())
     # 3. Add to the data cache
+    if error:
+        print("-",add)
     data_cache.append(add)
     if len(data_cache) > data_cache_capacity:
         del data_cache[0]
@@ -61,15 +67,9 @@ try:
         while time.time() < time_end:                       # only close after <packet_capture_time> seconds
             sniff(prn=LogPacket, count=1)
         packet_capture_time = time.time() - time_start      # Due to delay, the packet may take longer to capture
-        
 
         # 3,2. Scan input packets for DDoS looking activity
-        under_attack = Firewall.Check_For_DDoS(data_cache, packet_capture_time)
-        # 3.3. IF there's a suspected DDoS attack:
-        if under_attack:
-            pass
-            # 3.3.1. Block the ip
-            # 3.3.2. Email the Admin
+        ip_array, sus_ips = Firewall.Check_For_DDoS(data_cache, packet_capture_time)
         # Create 1 frame of the GUI
         gui.Input(data_cache)
         gui.Update()

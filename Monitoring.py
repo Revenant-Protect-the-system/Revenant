@@ -88,7 +88,7 @@ def capturePackets():
     print(protocol_counter)
     print(captured)
     print("\n\n\n\n\n\n\n")
-    main_Database.Print()################################
+    #main_Database.Print()################################
     printChart()
     main_Database.Save()
     return captured
