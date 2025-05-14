@@ -2,6 +2,7 @@ import time
 import sys
 if sys.platform.startswith('win'):
     print("Running on Windows")
+    import subprocess
 elif sys.platform.startswith('linux'):
     print("Running on Linux")
     import iptc             # NOTE: "iptc" (AKA "python-iptable") will only works on Linux and the library itself can only be downloaded on a Linux system.
@@ -13,6 +14,8 @@ BLOCK_TIME = 9000
 def block_ip(ip):
     if sys.platform.startswith('win'):
         print(f"<Pretend ip \"{ip}\" is blocked>")
+        command = f"netsh advfirewall firewall add rule name=\"Revenant Block {ip}\" dir=in action=block remoteip={ip}"
+        subprocess.run(command, shell=True)
     elif sys.platform.startswith('linux'):
         if ip in blocked:
             return  
@@ -32,6 +35,8 @@ def block_ip(ip):
 def unblock_expired():
     if sys.platform.startswith('win'):
         print("<unblock_expired()>")
+        command = f"netsh advfirewall firewall delete rule name=\"Revenant Block {ip}\" remoteip={ip}"
+        subprocess.run(command, shell=True)
     elif sys.platform.startswith('linux'):
         now = time.time()
         chain = iptc.Chain(iptc.Table(iptc.Table.FILTER), "INPUT")

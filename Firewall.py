@@ -47,5 +47,4 @@ def Check_For_DDoS(data, time_gap):
         print(f"ip {ip} sends {instances:.2f} packets/s and consumes {bandwidth:.2f} Bytes/s!")
     # </TESTING>
     
-    print ("ip_dict =", ip_dict)
     return ip_dict
