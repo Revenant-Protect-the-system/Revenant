@@ -105,11 +105,12 @@ try:
         ip_list = list()
         for ip in ip_dict.keys():
             ip_list.append( (ip, ip_dict[ip][0], ip_dict[ip][1], ip_dict[ip][2]) )
+        print("ip_list =", ip_list)
         # Create 1 frame of the GUI
         gui.Input(ip_list)
         gui.Update(ip_list)
         gui.Render()
-        print("\n\n\n")
+        print("\n")
 except GUI.Close_Window:
     # 4. Close & Save all tools used
     gui.Close()
